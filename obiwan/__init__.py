@@ -3,6 +3,8 @@ import gc
 import types
 import opcode
 import decimal
+import atexit
+import sys
 
 
 class ObiwanError(Exception):
@@ -342,10 +344,14 @@ def _runtime_checker(frame, evt, arg):
         # http://stackoverflow.com/a/12800909/15721
 
 
+def _atexit():
+    sys.settrace(None)
+
+
 def install_obiwan_runtime_check():
     if hasattr(_runtime_checker, "enabled") and _runtime_checker.enabled:
         return
-    import sys
     sys.settrace(_runtime_checker)
+    atexit.register(_atexit)
     _runtime_checker.lookup = {}
     _runtime_checker.enabled = True
